@@ -1,58 +1,32 @@
 #encoding:utf-8
 from sklearn import datasets as ds
 import numpy as np
-
-def main():        
-    print("-main-")
-    
-def loss(X,Y,theta):#è®¡ç®—Xåœ¨hå‡½æ•°çš„ç»“æœyä¸­çš„å…¨éƒ¨æŸå¤±
-    num=np.size(Y)
-    h=np.dot(X,theta)
-    loss=np.dot((h-Y).transpose(),h-Y)/(2*num)
-    return loss[0][0]
-
-def der(X,Y,theta):
-    num=np.size(Y)
-    temp=np.dot(X,theta)-Y
-    return np.dot(X.transpose(),temp)/num
-    
+from sklearn.linear_model import LinearRegression
 
 if __name__=='__main__':
     print("---start---")
-    main()
-    boston = ds.load_boston() # å¯¼å…¥æ•°æ®é›†
-    X = boston.data # è·å¾—å…¶ç‰¹å¾å‘é‡,506ä¸ªæ•°æ®ï¼Œ13ä¸ªå±æ€§
-    Y = boston.target # è·å¾—æ ·æœ¬labelï¼Œ506ä¸ªæˆ¿ä»·å€¼
-    Y=Y.reshape(506,1)#å·¦åˆ—ä¸º1çš„å¢å¹¿ï¼Œæ‰€ä»¥æ˜¯450*14ï¼ˆç¬¬ä¸€åˆ—ä¸º1ï¼‰
-    xx=np.ones((506,1))
-    X = np.c_[xx,X]
+    boston = ds.load_boston() # µ¼ÈëÊı¾İ¼¯
+    X = boston.data # »ñµÃÆäÌØÕ÷ÏòÁ¿,506¸öÊı¾İ£¬13¸öÊôĞÔ
+    Y = boston.target # »ñµÃÑù±¾label£¬506¸ö·¿¼ÛÖµ
     
-    #å¯¹æ•°æ®è¿›è¡Œç‰¹å¾ç¼©æ”¾
-    for i in range(1,14):
-        maxn=X[:,i].max()
-        minn=X[:,i].min()
-        meann=X[:,i].mean()
-        X[:,i]=(X[:,i]-meann)/(maxn-minn)  
-
+    #¶¨ÒåÏßĞÔÄ£ĞÍ
+    linreg = LinearRegression()
+    #½øĞĞÑµÁ·
+    linreg.fit(X[0:450], Y[0:450])
     
-    #è®¾ç½®åˆå§‹å‚æ•°
-    theta=np.zeros((14,1))#å®šä¹‰14ä¸ªå‚æ•°
-    learnRatio=0.001#å®šä¹‰å­¦ä¹ ç‡
-    times=1700#å®šä¹‰å¾ªç¯æ¬¡æ•°
+    #»ñÈ¡ÏßĞÔ»Ø¹é²ÎÊıtÎªtheta t0ÎªÆ«ÖÃÏî
+    t=linreg.coef_
+    t=t.reshape(13,1)
+    t0=linreg.intercept_
     
-    for i in range(0,times):
-        if i%10==0:
-            print("After %d:\tloss in train is: %.7f\tloss in validation is %.7f"%(i,loss(X[0:400],Y[0:400],theta),loss(X[400:450],Y[400:450],theta)))
-            #print("After "+str(i)+" loss in train is: %.2f"+"\t\tloss in Validation is: "+str(loss(X[400:450],Y[400:450],theta)),%loss(X[0:400],Y[0:400],theta))
-        theta=theta-learnRatio*der(X[0:400],Y[0:400],theta)
-    
-    #å¯¹è®­ç»ƒçš„ç»“æœè¿›è¡Œé¢„æµ‹
+    #Ô¤²â¼¯
     PX=X[450:506]
     PY=Y[450:506]
-    pY=np.dot(PX,theta)
-    for i in range(0,PY.size):
-        print("predict: %.1f\treal: %.1f"%(pY[i,0],PY[i,0]))
-    print("loss in predict is:"+str(loss(X[450:506],Y[450:506],theta)))
+    PY=PY.reshape(56,)
     
-    
+    #½øĞĞÔ¤²â
+    pY=np.dot(PX,t)+t0
+    pY=pY.reshape(56,)
+    for i in range(0,np.size(PY)):
+        print("Predict: "+str(pY[i])+" real: "+str(PY[i]))
     print("---end---")
